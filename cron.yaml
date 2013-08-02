@@ -1,0 +1,4 @@
+cron:
+- description: fetch new articles
+  url: /tasks/fetch
+  schedule: every 30 minutes

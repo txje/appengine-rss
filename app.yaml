@@ -1,0 +1,21 @@
+application: 
+version: 0-0-1
+runtime: python27
+api_version: 1
+threadsafe: no
+
+handlers:
+- url: /css
+  static_dir: css
+
+- url: /img
+  static_dir: img
+
+- url: /js
+  static_dir: js
+
+- url: /tasks/fetch
+  script: fetch.py
+
+- url: /.*
+  script: index.py
