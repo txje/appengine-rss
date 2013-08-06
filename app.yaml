@@ -14,6 +14,9 @@ handlers:
 - url: /js
   static_dir: js
 
+- url: /incl
+  static_dir: incl
+
 - url: /tasks/fetch
   script: fetch.py
 
