@@ -1,9 +1,33 @@
 <!DOCTYPE html>
 <head>
-<title>Syndicate</title>
+<title>RSS Reader</title>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 <script src="js/reader.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='incl/bootstrap.3.rc1/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+<script src="incl/bootstrap.3.rc1/js/bootstrap.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: "Open Sans";
+  }
+  div.feed_link {
+    cursor: pointer;
+    color: gray;
+  }
+</style>
 </head>
 <body>
+  <div class="container">
+    <h1>RSS Reader</h1>
+    <div class="row">
+      <div class="col-4" id="control">
+        <h3>Feeds</h3>
+      </div>
+      <div class="col-8" id="content">
+        <h3>Articles</h3>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

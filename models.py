@@ -10,12 +10,14 @@ class Reading(db.Model):
 class Unread(db.Model):
     user = db.IntegerProperty()
     article = db.IntegerProperty()
+    feed = db.IntegerProperty()
 
 class Article(db.Model):
     title = db.StringProperty()
     url = db.StringProperty()
     content = db.TextProperty()
     date = db.DateTimeProperty()
+    feed = db.IntegerProperty()
 
 class Feed(db.Model):
     title = db.StringProperty()
