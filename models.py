@@ -10,7 +10,6 @@ class Reading(db.Model):
 class Unread(db.Model):
     user = db.IntegerProperty()
     article = db.IntegerProperty()
-    feed = db.IntegerProperty()
 
 class Article(db.Model):
     title = db.StringProperty()

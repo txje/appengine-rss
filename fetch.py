@@ -27,7 +27,7 @@ def update_feeds():
             matches.filter('title = ', title)
             matches.filter('url = ', url)
             if not matches.get():
-                a = models.Article(title = title, url = url, content = content, date = date) # ADD ID
+                a = models.Article(title = title, url = url, content = content, date = date, feed = feed.key().id())
                 a.put()
                 for user in active_feeds[fid]:
                     u = models.Unread(user = user, article = a.key().id())
