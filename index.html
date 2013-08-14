@@ -11,9 +11,11 @@
   body {
     font-family: "Open Sans";
   }
-  h1.header {
+  .header {
+    width: 100%;
     background-color: #FFFFFF;
     z-index: 2;
+    border-bottom: 1px solid #333333;
   }
   div.feed_link {
     cursor: pointer;
@@ -39,7 +41,9 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="header static">RSS Reader</h1>
+    <div class="header static">
+      <h1>RSS Reader</h1>
+    </div>
   </div>
   <div class="container">
     <h1 class="header">&nbsp;</h1>

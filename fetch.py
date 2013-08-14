@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import models
-import datetime
+from datetime import datetime, timedelta
 from google.appengine.api import urlfetch
 from xml.etree import ElementTree # XML parsing
 
@@ -22,7 +22,26 @@ def update_feeds():
             title = article.find("title").text
             url = article.find("link").text
             content = article.find("description").text
-            date = article.find("pubDate").text if article.find("pubDate") else datetime.datetime.now()
+
+            # parse pubDate
+            # date is given as "Mon, 12 Aug 2013 01:00:00 GMT" or "-0000" instead of "GMT"
+            pubDate = article.find("pubDate")
+            if pubDate != None:
+              pubDate = pubDate.text
+              try:
+                date = datetime.strptime(pubDate, "%a, %d %b %Y %H:%M:%S %Z")
+              except Exception as e:
+                try:
+                  offset = int(pubDate[-5:])
+                  date = datetime.strptime(pubDate[:-6], "%a, %d %b %Y %H:%M:%S")
+                  delta = timedelta(hours = offset / 100)
+                  date -= delta
+                except Exception as e:
+                  date = datetime.now()
+            else:
+              date = datetime.now()
+
+            #print title + " (" + url + ") at " + str(date) + "<br/>"
             matches = models.Article.all()
             matches.filter('title = ', title)
             matches.filter('url = ', url)
