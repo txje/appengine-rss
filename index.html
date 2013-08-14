@@ -11,21 +11,46 @@
   body {
     font-family: "Open Sans";
   }
+  h1.header {
+    background-color: #FFFFFF;
+    z-index: 2;
+  }
   div.feed_link {
     cursor: pointer;
     color: gray;
+  }
+  a.article_title {
+    font-size: 2em;
+    color: #333333;
+    text-decoration: none;
+  }
+  div.article_content {
+  }
+  div.article_box {
+    border: 1px solid #333333;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+  .static {
+    position: fixed;
   }
 </style>
 </head>
 <body>
   <div class="container">
-    <h1>RSS Reader</h1>
+    <h1 class="header static">RSS Reader</h1>
+  </div>
+  <div class="container">
+    <h1 class="header">&nbsp;</h1>
     <div class="row">
-      <div class="col-4" id="control">
+      <div class="col-2" id="control">
         <h3>Feeds</h3>
       </div>
-      <div class="col-8" id="content">
+      <div class="col-10">
         <h3>Articles</h3>
+        <div id="content">
+        </div>
       </div>
     </div>
   </div>

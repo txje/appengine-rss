@@ -1,15 +1,53 @@
 $(document).ready(function() {
+    function Article(id) {
+        var $elem = null;
+
+        this.load = function($e) {
+            $elem = $e;
+            $.getJSON("article?article=" + id, function(data) {
+                console.log("article " + id + ":", data);
+                // title, url, content, date
+                var article = data["article"];
+                var title = $("<a>");
+                title.text(article.title);
+                title.attr('href', article.url);
+                title.addClass("article_title");
+                var content = $("<div>");
+                content.html(article.content);
+                content.addClass("article_content");
+                $elem.append(title);
+                $elem.append($("<hr>"));
+                $elem.append(content);
+            });
+        }
+
+        this.unload = function() {
+            $elem.html("");
+        }
+    }
+
     function Reader(user) {
+        var reading_index = 0;
+        var queue = [];
+
+        // not implemented (YET... mwahaha)
         this.starred = function() {
             $.getJSON("starred?u=" + user, function(data) {
                 console.log(user + "'s starred:" , data);
             });
         }
 
-        function process_feeds(feeds) {
+        function process_feeds(feeds, unread) {
             var $all_feeds = $("<div>");
             $all_feeds.addClass('feed_link');
-            $all_feeds.append("All");
+            $all_feeds.append("All ");
+            var unread_span = $("<span>");
+            unread_span.attr('id', "unread_All");
+            var unread_total = 0;
+            for(feed in unread)
+                unread_total += unread[feed];
+            unread_span.text("(" + unread_total + ")");
+            $all_feeds.append(unread_span);
             $all_feeds.click(function() {
               get_unread('all');
             });
@@ -19,7 +57,11 @@ $(document).ready(function() {
               console.log('  ', feed);
               var feed_link = $("<div>");
               feed_link.addClass('feed_link');
-              feed_link.append(feed["title"]);
+              feed_link.append(feed["title"] + " ");
+              var unread_span = $("<span>");
+              unread_span.attr('id', "unread_" + feed["title"]);
+              unread_span.text("(" + unread[feed["title"]] + ")");
+              feed_link.append(unread_span);
               feed_link.click(function(feed) {
                 get_unread(feed["id"]);
               }.bind(this, feed));
@@ -30,15 +72,28 @@ $(document).ready(function() {
         function get_unread(feed) {
             $.getJSON("list?u=" + user + "&feed=" + feed, function(data) {  // get user's unread reading list
                 console.log(user + "'s reading list:", data);
-                load_articles(data['articles']);
+                var articles = data['articles'];
+                var content = $('#content');
+                content.empty();
+                for(var a = 0; a < articles.length; a++) {
+                    var article = new Article(articles[a]);
+                    var article_box = $("<div>");
+                    article_box.addClass("article_box");
+                    content.append(article_box);
+                    article.load(article_box);
+                }
             });
         }
-        
+
         // init
         $.getJSON("feeds?u=" + user, function(data) { // get user's feed
             var feeds = data["feeds"];
             console.log(user + "'s feeds:", feeds);
-            process_feeds(feeds);
+            $.getJSON("unread_counts?u=" + user, function(data) {
+                console.log("unread:", data);
+                unread = data["counts"];
+                process_feeds(feeds, unread);
+            });
         });
     }
     
