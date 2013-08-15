@@ -8,6 +8,15 @@ deploy their own. Enjoy!
 It should mostly work out of the box. Follow these steps:
 
 1. Download it
+2. Include the following:
+    incl/bootstrap.3.rc1/css/bootstrap.min.css
+    incl/bootstrap.3.rc1/js/bootstrap.min.js
+    incl/glyphicons/css/bootstrap-glyphicons.css
+    incl/glyphicons/fonts/glyphiconshalflings-regular.eot
+    incl/glyphicons/fonts/glyphiconshalflings-regular.otf
+    incl/glyphicons/fonts/glyphiconshalflings-regular.svg
+    incl/glyphicons/fonts/glyphiconshalflings-regular.ttf
+    incl/glyphicons/fonts/glyphiconshalflings-regular.woff
 2. On line 1 of app.yaml, put your application identifier
 3. Deploy to AppEngine
 4. Go to [your identifier].appspot.com
