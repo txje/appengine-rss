@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    function Article(id) {
+    function Article(id, user) {
         var $elem = null;
 
         this.load = function($e) {
@@ -12,10 +12,25 @@ $(document).ready(function() {
                 title.text(article.title);
                 title.attr('href', article.url);
                 title.addClass("article_title");
+                var controls = $("<span>");
+                controls.addClass("article_controls");
+                var star_btn = $("<a>");
+                controls.append(star_btn);
+                star_btn.addClass("glyphicon");
+                star_btn.addClass("star_link");
+                star_btn.addClass("glyphicon-star-empty");
+                star_btn.click(function() {
+                  $.get("star?u=" + user + "&article=" + id, function(data) {
+                    var $btn = $(this);
+                    $btn.removeClass("glyphicon-star-empty");
+                    $btn.addClass("glyphicon-star");
+                  }.bind(this));
+                });
                 var content = $("<div>");
                 content.html(article.content);
                 content.addClass("article_content");
                 $elem.append(title);
+                $elem.append(controls);
                 $elem.append($("<hr>"));
                 $elem.append(content);
             });
@@ -76,7 +91,7 @@ $(document).ready(function() {
                 var content = $('#content');
                 content.empty();
                 for(var a = 0; a < articles.length; a++) {
-                    var article = new Article(articles[a]);
+                    var article = new Article(articles[a], user);
                     var article_box = $("<div>");
                     article_box.addClass("article_box");
                     content.append(article_box);
@@ -89,7 +104,7 @@ $(document).ready(function() {
         $.getJSON("feeds?u=" + user, function(data) { // get user's feed
             var feeds = data["feeds"];
             console.log(user + "'s feeds:", feeds);
-            $.getJSON("unread_counts?u=" + user, function(data) {
+            $.getJSON("unread?u=" + user, function(data) {
                 console.log("unread:", data);
                 unread = data["counts"];
                 process_feeds(feeds, unread);
