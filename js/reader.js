@@ -1,6 +1,7 @@
 $(document).ready(function() {
     function Article(id, user) {
         var $elem = null;
+        this.id = id;
 
         this.load = function($e) {
             $elem = $e;
@@ -20,11 +21,11 @@ $(document).ready(function() {
                 star_btn.addClass("star_link");
                 star_btn.addClass("glyphicon-star-empty");
                 star_btn.click(function() {
-                  $.get("star?u=" + user + "&article=" + id, function(data) {
-                    var $btn = $(this);
-                    $btn.removeClass("glyphicon-star-empty");
-                    $btn.addClass("glyphicon-star");
-                  }.bind(this));
+                    $.get("star?u=" + user + "&article=" + id, function(data) {
+                        var $btn = $(this);
+                        $btn.removeClass("glyphicon-star-empty");
+                        $btn.addClass("glyphicon-star");
+                    }.bind(this));
                 });
                 var content = $("<div>");
                 content.html(article.content);
@@ -39,13 +40,25 @@ $(document).ready(function() {
         this.unload = function() {
             $elem.html("");
         }
+
+        this.read = function() {
+            console.log("Marking article " + id + " read.");
+            $.get("read?u=" + user + "&article=" + id, function(data) {
+                if(data == "Success") {
+                    $elem.css('border-color', '#DDDDDD');
+                }
+            })
+        }
+
+        this.above_screen = function() {
+            return ($elem.offset().top < $(document).scrollTop());
+        }
     }
 
     function Reader(user) {
-        var reading_index = 0;
-        var queue = [];
+        var viewing_index = 0;
+        var loaded_articles = [];
 
-        // not implemented (YET... mwahaha)
         this.starred = function() {
             $.getJSON("starred?u=" + user, function(data) {
                 console.log(user + "'s starred:" , data);
@@ -68,19 +81,19 @@ $(document).ready(function() {
             });
             $("#control").append($all_feeds);
             for(var f = 0; f < feeds.length; f++) {
-              var feed = feeds[f];
-              console.log('  ', feed);
-              var feed_link = $("<div>");
-              feed_link.addClass('feed_link');
-              feed_link.append(feed["title"] + " ");
-              var unread_span = $("<span>");
-              unread_span.attr('id', "unread_" + feed["title"]);
-              unread_span.text("(" + unread[feed["title"]] + ")");
-              feed_link.append(unread_span);
-              feed_link.click(function(feed) {
-                get_unread(feed["id"]);
-              }.bind(this, feed));
-              $("#control").append(feed_link);
+                var feed = feeds[f];
+                console.log('  ', feed);
+                var feed_link = $("<div>");
+                feed_link.addClass('feed_link');
+                feed_link.append(feed["title"] + " ");
+                var unread_span = $("<span>");
+                unread_span.attr('id', "unread_" + feed["title"]);
+                unread_span.text("(" + unread[feed["title"]] + ")");
+                feed_link.append(unread_span);
+                feed_link.click(function(feed) {
+                    get_unread(feed["id"]);
+                }.bind(this, feed));
+                $("#control").append(feed_link);
             }
         }
 
@@ -90,8 +103,14 @@ $(document).ready(function() {
                 var articles = data['articles'];
                 var content = $('#content');
                 content.empty();
+
+                // reset viewing queue
+                loaded_articles = [];
+                viewing_index = 0;
+
                 for(var a = 0; a < articles.length; a++) {
                     var article = new Article(articles[a], user);
+                    loaded_articles.push(article);
                     var article_box = $("<div>");
                     article_box.addClass("article_box");
                     content.append(article_box);
@@ -99,6 +118,19 @@ $(document).ready(function() {
                 }
             });
         }
+
+        // auto-read articles as the pass out of the screen
+        $(document).scroll(function() {
+            var len = loaded_articles.length;
+            for(var i = viewing_index; i < len; i++) {
+                if(loaded_articles[i].above_screen()) {
+                    loaded_articles[i].read();
+                } else {
+                    break;
+                }
+            }
+            viewing_index = i;
+        }.bind(this));
 
         // init
         $.getJSON("feeds?u=" + user, function(data) { // get user's feed
