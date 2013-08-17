@@ -88,7 +88,11 @@ $(document).ready(function() {
                 feed_link.append(feed["title"] + " ");
                 var unread_span = $("<span>");
                 unread_span.attr('id', "unread_" + feed["title"]);
-                unread_span.text("(" + unread[feed["title"]] + ")");
+                if(feed["title"] in unread) {
+                  unread_span.text("(" + unread[feed["title"]] + ")");
+                } else {
+                  unread_span.text("(0)");
+                }
                 feed_link.append(unread_span);
                 feed_link.click(function(feed) {
                     get_unread(feed["id"]);
