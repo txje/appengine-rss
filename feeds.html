@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<head>
+<title>RSS Reader - Feeds</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="js/feed_manager.js"></script>
+<script>
+    $(document).ready(function() {
+        var reader = new FeedManager("{{ user }}");
+    });
+</script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='incl/bootstrap.3.rc1/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+<link href='incl/glyphicons/css/bootstrap-glyphicons.css' rel='stylesheet' type='text/css'>
+<script src="incl/bootstrap.3.rc1/js/bootstrap.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href='css/main.css' rel='stylesheet' type='text/css'>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="header">RSS Reader - Manage Feeds</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <h3>Current Feeds</h3>
+        <div id="content">
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="remove_feed_modal" tabindex="-1" role="dialog" aria-labelledby="removeFeedModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Remove Feed</h4>
+              </div>
+              <div class="modal-body">
+                Are you sure you want to remove "<span id='feed_to_remove'></span>" from your feeds?
+                <br/>
+                <br/>
+                You will no longer get unread articles from this website.
+              </div>
+              <input type="hidden" id="feed_id_to_remove"/>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirm_remove_feed">Yes</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <h3>Add Feed</h3>
+        <div id="add_content">
+          <div class="alert alert-danger" style="display:none" id="add_feed_error_box"><strong class="emph">Problemmm</strong><span id="add_feed_error"></span></div>
+          <form class="form-inline" role="form">
+            <div class="form-group">
+              <label class="sr-only" for="feed_url">URL</label>
+              <input type="text" class="form-control" id="feed_url" placeholder="URL">
+            </div>
+            <button class="btn btn-default" id="add_feed">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <br/>
+        <a href="/" class="btn btn-primary">Done</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

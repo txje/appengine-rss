@@ -1,0 +1,55 @@
+body {
+  font-family: "Open Sans";
+}
+.header {
+  width: 100%;
+  background-color: #FFFFFF;
+  z-index: 2;
+  border-bottom: 1px solid #333333;
+}
+div.feed_link {
+  cursor: pointer;
+  color: gray;
+}
+a.article_title {
+  font-size: 2em;
+  color: #333333;
+  text-decoration: none;
+}
+div.article_content {
+}
+div.article_box {
+  border: 1px solid #333333;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+.static {
+  position: fixed;
+}
+span.article_controls {
+  float: right;
+}
+a.icon-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.spacer-10 {
+  display: inline-block;
+  padding: 0px;
+  margin: 0px;
+  width: 10px;
+}
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: @screen-sm) {
+}
+
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: @screen-md) {
+}
+
+/* Large devices (large desktops, 1200px and up) */
+@media (min-width: @screen-lg) {
+}

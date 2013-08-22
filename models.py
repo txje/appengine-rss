@@ -35,3 +35,4 @@ class Feed(AugmentedModel):
     url = db.StringProperty()
     description = db.TextProperty()
     language = db.StringProperty()
+    link = db.StringProperty()

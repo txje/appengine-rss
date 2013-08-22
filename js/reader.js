@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    function Article(id, user) {
+    this.Article = function(id, user) {
         var $elem = null;
         this.id = id;
 
@@ -18,7 +18,8 @@ $(document).ready(function() {
                 var star_btn = $("<a>");
                 controls.append(star_btn);
                 star_btn.addClass("glyphicon");
-                star_btn.addClass("star_link");
+                star_btn.addClass("icon-link");
+                star_btn.css("font-size", "2em");
                 star_btn.addClass("glyphicon-star-empty");
                 star_btn.click(function() {
                     $.get("star?u=" + user + "&article=" + id, function(data) {
@@ -35,6 +36,9 @@ $(document).ready(function() {
                 $elem.append($("<hr>"));
                 $elem.append(content);
             });
+            $elem.click(function() {
+                this.read();
+            }.bind(this));
         }
 
         this.unload = function() {
@@ -55,7 +59,7 @@ $(document).ready(function() {
         }
     }
 
-    function Reader(user) {
+    this.Reader = function(user) {
         var viewing_index = 0;
         var loaded_articles = [];
 
@@ -147,6 +151,4 @@ $(document).ready(function() {
             });
         });
     }
-    
-    var reader = new Reader("jeremy");
-});
+}.bind(window));
