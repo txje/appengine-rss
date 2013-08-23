@@ -12,6 +12,7 @@ $(document).ready(function() {
                 var title = $("<a>");
                 title.text(article.title);
                 title.attr('href', article.url);
+                title.attr("target", "_blank");
                 title.addClass("article_title");
                 var controls = $("<span>");
                 controls.addClass("article_controls");

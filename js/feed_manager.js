@@ -25,13 +25,16 @@ $(document).ready(function() {
 
         var a = $("<a>");
         a.attr("href", link);
+        a.attr("target", "_blank");
         a.append(title);
         a.css("cursor", "pointer");
         this.elem.append(a);
 
         var desc = $("<span>");
         desc.css("text-decoration", "italics");
-        desc.append(" - " + description);
+        if(description) {
+          desc.append(" - " + description);
+        }
         this.elem.append(desc);
     }
 
@@ -41,14 +44,38 @@ $(document).ready(function() {
         $("#content").append(feed_box);
 
         this.new_feed = function(url) {
-            $.post("add", {"u": user, "feed": url}, function(data, textStatus) {
+            var posting = $.post("add", {"u": user, "feed": url}); // POST will return parsed JSON data
+            posting.done(function(data, textStatus) {
+                data = JSON.parse(data);
                 if(textStatus == "success") {
-                    var f = new Feed(JSON.parse(data));
-                    feed_box.append(f.elem);
-                } else {
-                    error("Unable to add feed, check the URL");
+                  if(data.error == null) {
+                    // clear the URL
+                    $("#feed_url").val("");
+                    // check if feed already exists
+                    for(var f = 0; f < feeds.length; f++) {
+                      if(feeds[f].id == data.id) {
+                        $("#add_feed_error").text("You are already subscribed to \"" + data.title + "\".");
+                        $("#add_feed_error_box").show();
+                        return;
+                      }
+                    }
+                    // add the feed
+                    var feed = new Feed(data);
+                    feeds.push(feed);
+                    feed_box.append(feed.elem);
+                    $("#add_feed_error_box").hide();
+                  } else {
+                    var error_text = data.error;
+                    $("#add_feed_error").text(error_text);
+                    $("#add_feed_error_box").show();
+                  }
                 }
-            });
+                else {
+                  var error_text = "Unable to add feed, re-check the URL.";
+                  $("#add_feed_error").text(error_text);
+                  $("#add_feed_error_box").show();
+                }
+            }.bind(this));
         }
 
         $.getJSON("feeds?u=" + user, function(data) {
@@ -79,29 +106,7 @@ $(document).ready(function() {
         }.bind(this));
 
         $("#add_feed").click(function() {
-          $.post("add?u=" + user + "&feed=" + $("#feed_url").val(), function(data, textStatus) {
-            console.log(textStatus);
-            if(textStatus == "success") {
-              if(data.error == null) {
-                // add the feed
-                for(var f = 0; f < feeds.length; f++) {
-                  $("#feed_url").text("");
-                  var feed = new Feed(data);
-                  feeds.push(feed);
-                  feed_box.append(feed.elem);
-                }
-              } else {
-                var error_text = data.error;
-                $("#add_feed_error").text(error_text);
-                $("#add_feed_error_box").show();
-              }
-            }
-            else {
-              var error_text = "Unable to add feed, re-check the URL.";
-              $("#add_feed_error").text(error_text);
-              $("#add_feed_error_box").show();
-            }
-          }.bind(this), "json"); // POST return will be interpreted as JSON
+          this.new_feed($("#feed_url").val());
           return false;
         }.bind(this));
     }

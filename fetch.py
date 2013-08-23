@@ -16,11 +16,12 @@ def update_feeds():
         result = urlfetch.fetch(feed.url)
         if result.status_code != 200:
             raise Exception("Failed to fetch feed URL: " + feed.url)
-        xml = ElementTree.fromstring(result.content)
-        if xml.find("rss"):
-            new_articles = parse_rss(xml)
-        elif xml.find("feed"):
-            new_articles = parse_atom(xml)
+        root = ElementTree.fromstring(result.content)
+        atom_ns = '{http://www.w3.org/2005/Atom}'
+        if root.tag == "rss":
+            new_articles = parse_rss(root)
+        elif root.tag == atom_ns+"feed":
+            new_articles = parse_atom(root, atom_ns)
         else:
             print "Error: unknown feed format (must be RSS or Atom)"
             return
@@ -34,9 +35,9 @@ def update_feeds():
                     u = models.Unread(user = user, article = a.key().id())
                     u.put()
 
-def parse_rss(xml):
+def parse_rss(root):
   new_articles = []
-  for article in xml.find("channel").findall("item"):
+  for article in root.find("channel").findall("item"):
       title = article.find("title").text
       url = article.find("link").text
       content = article.find("description").text
@@ -64,16 +65,16 @@ def parse_rss(xml):
       new_articles.append({"title":title, "url":url, "content":content, "date":date})
   return new_articles
 
-def parse_atom(xml):
+def parse_atom(root, namespace):
   new_articles = []
-  for article in xml.find("feed").findall("entry"):
-      title = article.find("title").text
-      url = article.find("link").get("href")
-      content = article.find("content").text if article.find("content") else article.find("summary").text
+  for article in root.findall(namespace+"entry"):
+      title = article.find(namespace+"title").text
+      url = article.find(namespace+"link").get("href")
+      content = article.find(namespace+"content").text if article.find(namespace+"content") is not None else article.find(namespace+"summary").text
 
       # parse pubDate (<updated>)
       # date is given as "2013-08-12T01:00:00Z" or "-01:00" instead of "Z" and may optionally have two decimals of extra precision in the seconds place
-      pubDate = article.find("updated")
+      pubDate = article.find(namespace+"updated")
       if pubDate != None:
         pubDate = pubDate.text
         try:

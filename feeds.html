@@ -8,7 +8,7 @@
         var reader = new FeedManager("{{ user }}");
     });
 </script>
-<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
 <link href='incl/bootstrap.3.rc1/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
 <link href='incl/glyphicons/css/bootstrap-glyphicons.css' rel='stylesheet' type='text/css'>
 <script src="incl/bootstrap.3.rc1/js/bootstrap.min.js"></script>
@@ -56,7 +56,10 @@
       <div class="col-12">
         <h3>Add Feed</h3>
         <div id="add_content">
-          <div class="alert alert-danger" style="display:none" id="add_feed_error_box"><strong class="emph">Problemmm</strong><span id="add_feed_error"></span></div>
+          <div class="alert alert-danger" style="display:none" id="add_feed_error_box">
+            <strong>Problemmmm: </strong>
+            <span id="add_feed_error"></span>
+          </div>
           <form class="form-inline" role="form">
             <div class="form-group">
               <label class="sr-only" for="feed_url">URL</label>
