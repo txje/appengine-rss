@@ -2,6 +2,7 @@ $(document).ready(function() {
     this.Article = function(id, user) {
         var $elem = null;
         this.id = id;
+        var feed_id = null;
 
         this.load = function($e) {
             $elem = $e;
@@ -9,6 +10,7 @@ $(document).ready(function() {
                 console.log("article " + id + ":", data);
                 // title, url, content, date
                 var article = data["article"];
+                feed_id = article["feed"];
                 var title = $("<a>");
                 title.text(article.title);
                 title.attr('href', article.url);
@@ -36,7 +38,7 @@ $(document).ready(function() {
                 $elem.append(controls);
                 $elem.append($("<hr>"));
                 $elem.append(content);
-            });
+            }.bind(this));
             $elem.click(function() {
                 this.read();
             }.bind(this));
@@ -51,8 +53,14 @@ $(document).ready(function() {
             $.get("read?u=" + user + "&article=" + id, function(data) {
                 if(data == "Success") {
                     $elem.css('border-color', '#DDDDDD');
+                    var unreads = $("#unread_" + feed_id);
+                    var count = parseInt(unreads.text().substring(1, unreads.text().length-1));
+                    unreads.text("(" + (count-1) + ")");
+                    var all = $("#unread_All");
+                    count = parseInt(all.text().substring(1, all.text().length-1));
+                    all.text("(" + (count-1) + ")");
                 }
-            })
+            }.bind(this))
         }
 
         this.above_screen = function() {
@@ -87,12 +95,11 @@ $(document).ready(function() {
             $("#control").append($all_feeds);
             for(var f = 0; f < feeds.length; f++) {
                 var feed = feeds[f];
-                console.log('  ', feed);
                 var feed_link = $("<div>");
                 feed_link.addClass('feed_link');
                 feed_link.append(feed["title"] + " ");
                 var unread_span = $("<span>");
-                unread_span.attr('id', "unread_" + feed["title"]);
+                unread_span.attr('id', "unread_" + feed["id"]);
                 if(feed["title"] in unread) {
                   unread_span.text("(" + unread[feed["title"]] + ")");
                 } else {
@@ -108,7 +115,7 @@ $(document).ready(function() {
 
         function get_unread(feed) {
             $.getJSON("list?u=" + user + "&feed=" + feed, function(data) {  // get user's unread reading list
-                console.log(user + "'s reading list:", data);
+                $("html, body").scrollTop(0);
                 var articles = data['articles'];
                 var content = $('#content');
                 content.empty();
