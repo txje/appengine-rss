@@ -23,10 +23,8 @@ It should mostly work out of the box. Follow these steps:
 3. Deploy to AppEngine
 4. Go to [your identifier].appspot.com
 
-http://localhost:8000/new_user?name=jeremy
-http://localhost:8000/add?u=jeremy&feed=http://lifehacker.com/rss
-http://localhost:8000/add?u=jeremy&feed=http://xkcd.com/rss.xml
-http://localhost:8000/tasks/fetch
+To start - http://localhost:8000/new_user?name=jeremy
+To update feeds - http://localhost:8000/tasks/fetch
 
 
 LICENSE
