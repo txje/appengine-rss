@@ -1,8 +1,9 @@
 $(document).ready(function() {
-    this.Article = function(id, user) {
+    this.Article = function(id, user, starred) {
         var $elem = null;
         this.id = id;
         var feed_id = null;
+        var done_reading = (starred == true);
 
         this.load = function($e) {
             $elem = $e;
@@ -23,13 +24,24 @@ $(document).ready(function() {
                 star_btn.addClass("glyphicon");
                 star_btn.addClass("icon-link");
                 star_btn.css("font-size", "2em");
-                star_btn.addClass("glyphicon-star-empty");
+                if(starred) {
+                    star_btn.addClass("glyphicon-star");
+                } else {
+                    star_btn.addClass("glyphicon-star-empty");
+                }
                 star_btn.click(function() {
-                    $.get("star?u=" + user + "&article=" + id, function(data) {
-                        var $btn = $(this);
-                        $btn.removeClass("glyphicon-star-empty");
-                        $btn.addClass("glyphicon-star");
-                    }.bind(this));
+                    var $btn = $(this);
+                    if($btn.hasClass("glyphicon-star-empty")) {
+                      $.get("star?u=" + user + "&article=" + id, function(data) {
+                          $btn.removeClass("glyphicon-star-empty");
+                          $btn.addClass("glyphicon-star");
+                      }.bind(this));
+                    } else if($btn.hasClass("glyphicon-star")) {
+                      $.get("unstar?u=" + user + "&article=" + id, function(data) {
+                          $btn.removeClass("glyphicon-star");
+                          $btn.addClass("glyphicon-star-empty");
+                      }.bind(this));
+                    }
                 });
                 var content = $("<div>");
                 content.html(article.content);
@@ -49,7 +61,9 @@ $(document).ready(function() {
         }
 
         this.read = function() {
-            console.log("Marking article " + id + " read.");
+            if(done_reading) return;
+            done_reading = true;
+
             $.get("read?u=" + user + "&article=" + id, function(data) {
                 if(data == "Success") {
                     $elem.css('border-color', '#DDDDDD');
@@ -93,6 +107,7 @@ $(document).ready(function() {
               get_unread('all');
             });
             $("#control").append($all_feeds);
+            $("#control").append("<br/>");
             for(var f = 0; f < feeds.length; f++) {
                 var feed = feeds[f];
                 var feed_link = $("<div>");
@@ -111,6 +126,14 @@ $(document).ready(function() {
                 }.bind(this, feed));
                 $("#control").append(feed_link);
             }
+            $("#control").append("<br/>");
+            var $starred = $("<div>");
+            $starred.addClass('feed_link');
+            $starred.append("Starred");
+            $starred.click(function() {
+              get_starred();
+            });
+            $("#control").append($starred);
         }
 
         function get_unread(feed) {
@@ -126,6 +149,28 @@ $(document).ready(function() {
 
                 for(var a = 0; a < articles.length; a++) {
                     var article = new Article(articles[a], user);
+                    loaded_articles.push(article);
+                    var article_box = $("<div>");
+                    article_box.addClass("article_box");
+                    content.append(article_box);
+                    article.load(article_box);
+                }
+            });
+        }
+
+        function get_starred() {
+            $.getJSON("starred?u=" + user, function(data) {
+                $("html, body").scrollTop(0);
+                var articles = data['articles'];
+                var content = $('#content');
+                content.empty();
+
+                // reset viewing queue
+                loaded_articles = [];
+                viewing_index = 0;
+
+                for(var a = 0; a < articles.length; a++) {
+                    var article = new Article(articles[a], user, true); // starred = true
                     loaded_articles.push(article);
                     var article_box = $("<div>");
                     article_box.addClass("article_box");
