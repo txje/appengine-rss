@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <head>
-<title>RSS Reader</title>
+<title>Feeeeeder</title>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 <script src="js/reader.js"></script>
 <script>
     $(document).ready(function() {
-        var reader = new Reader("{{ user }}");
+        var reader = new Reader();
     });
 </script>
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -18,7 +18,7 @@
 <body>
   <div class="container">
     <div class="header static">
-      <h1>RSS Reader</h1>
+      <h1>Feeeeeder</h1>
     </div>
   </div>
   <div class="container">
@@ -26,6 +26,11 @@
     <div class="row">
       <div class="col-md-2">
         <div class="static" id="control">
+          <div>
+            Logged in as {{ user }}
+            <br/>
+            (<a class="link" href="{{ logout_url }}">Log out</a>)
+          </div>
           <h3>Feeds</h3>
           <div>
             <a href="manage_feeds" class="btn btn-sm btn-primary">Manage my feeds</a>
@@ -35,6 +40,7 @@
         </div>
       </div>
       <div class="col-md-10">
+        <div>&nbsp;</div>
         <h3>Articles</h3>
         <div id="content">
         </div>

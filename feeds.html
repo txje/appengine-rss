@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <head>
-<title>RSS Reader - Feeds</title>
+<title>Feeeeeder</title>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 <script src="js/feed_manager.js"></script>
 <script>
     $(document).ready(function() {
-        var reader = new FeedManager("{{ user }}");
+        var reader = new FeedManager();
     });
 </script>
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -19,11 +19,16 @@
   <div class="container">
     <div class="row">
       <div class="col-12">
-        <h1 class="header">RSS Reader - Manage Feeds</h1>
+        <h1 class="header">Manage Feeeeeds</h1>
       </div>
     </div>
     <div class="row">
       <div class="col-12">
+        <div>
+          Logged in as {{ user }}
+          <br/>
+          (<a class="link" href="{{ logout_url }}">Log out</a>)
+        </div>
         <h3>Current Feeds</h3>
         <div id="content">
         </div>
@@ -57,13 +62,13 @@
         <h3>Add Feed</h3>
         <div id="add_content">
           <div class="alert alert-danger" style="display:none" id="add_feed_error_box">
-            <strong>Problemmmm: </strong>
+            <strong>Problemmmmm: </strong>
             <span id="add_feed_error"></span>
           </div>
           <form class="form-inline" role="form">
             <div class="form-group">
-              <label class="sr-only" for="feed_url">URL</label>
-              <input type="text" class="form-control" id="feed_url" placeholder="URL">
+              <label class="sr-only" for="feed_url">RSS or Atom XML URL</label>
+              <input type="text" class="form-control" id="feed_url" placeholder="RSS or Atom XML URL">
             </div>
             <button class="btn btn-default" id="add_feed">Add</button>
           </form>

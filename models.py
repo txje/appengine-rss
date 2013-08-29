@@ -37,6 +37,7 @@ class AugmentedModel(db.Model):
 
 class User(AugmentedModel):
     name = db.StringProperty()
+    google_id = db.StringProperty()
 
 class Reading(AugmentedModel):
     user = db.IntegerProperty()

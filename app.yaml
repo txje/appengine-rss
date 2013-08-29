@@ -1,8 +1,8 @@
 application: 
-version: 0-0-1
+version: 0-1-0
 runtime: python27
 api_version: 1
-threadsafe: no
+threadsafe: true
 
 handlers:
 - url: /css
@@ -18,7 +18,11 @@ handlers:
   static_dir: incl
 
 - url: /tasks/fetch
-  script: fetch.py
+  script: fetch.app
 
 - url: /.*
-  script: index.py
+  script: index.app
+
+libraries:
+- name: webapp2
+  version: latest

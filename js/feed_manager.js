@@ -38,13 +38,13 @@ $(document).ready(function() {
         this.elem.append(desc);
     }
 
-    this.FeedManager = function(user) {
+    this.FeedManager = function() {
         var feeds = [];
         var feed_box = $("<div>");
         $("#content").append(feed_box);
 
         this.new_feed = function(url) {
-            var posting = $.post("add", {"u": user, "feed": url}); // POST will return parsed JSON data
+            var posting = $.post("add", {"feed": url}); // POST will return parsed JSON data
             posting.done(function(data, textStatus) {
                 data = JSON.parse(data);
                 if(textStatus == "success") {
@@ -78,7 +78,7 @@ $(document).ready(function() {
             }.bind(this));
         }
 
-        $.getJSON("feeds?u=" + user, function(data) {
+        $.getJSON("feeds", function(data) {
             var feeds_data = data["feeds"];
             for(var f = 0; f < feeds_data.length; f++) {
                 var feed = new Feed(feeds_data[f]);
@@ -88,7 +88,7 @@ $(document).ready(function() {
         });
 
         $("#confirm_remove_feed").click(function() {
-          $.get("remove?u=" + user + "&feed=" + $("#feed_id_to_remove").val(), function(data, textStatus) {
+          $.get("remove?feed=" + $("#feed_id_to_remove").val(), function(data, textStatus) {
             if(textStatus == "success") {
               // close the modal
               $("#remove_feed_modal").modal("hide");
