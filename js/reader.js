@@ -106,6 +106,7 @@ $(document).ready(function() {
             $all_feeds.click(function() {
               get_unread('all');
             });
+            get_unread('all'); // load all unread articles by default
             $("#control").append($all_feeds);
             $("#control").append("<br/>");
             for(var f = 0; f < feeds.length; f++) {

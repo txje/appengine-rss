@@ -24,9 +24,17 @@ div.article_box {
   padding: 10px;
   margin-bottom: 20px;
 }
-.static {
-  position: fixed;
+
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .static {
+    position: fixed;
+  }
+  .main {
+    padding-top: 80px;
+  }
 }
+
 span.article_controls {
   float: right;
 }
@@ -47,10 +55,6 @@ a.link {
 
 /* Small devices (tablets, 768px and up) */
 @media (min-width: @screen-sm) {
-}
-
-/* Medium devices (desktops, 992px and up) */
-@media (min-width: @screen-md) {
 }
 
 /* Large devices (large desktops, 1200px and up) */
