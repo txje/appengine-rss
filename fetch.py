@@ -15,7 +15,11 @@ class updater(webapp2.RequestHandler):
             active_feeds[r.feed].append(r.user)
         for fid in active_feeds.keys():
             feed = models.Feed.get_by_id(fid)
-            result = urlfetch.fetch(feed.url)
+            try:
+              result = urlfetch.fetch(feed.url)
+            except Exception:
+              print "Failed to fetch URL %s" % feed.url
+              continue
             if result.status_code != 200:
                 raise Exception("Failed to fetch feed URL: " + feed.url)
             root = ElementTree.fromstring(result.content)
