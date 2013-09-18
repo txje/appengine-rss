@@ -8,7 +8,6 @@ $(document).ready(function() {
         this.load = function($e) {
             $elem = $e;
             $.getJSON("article?article=" + id, function(data) {
-                console.log("article " + id + ":", data);
                 // title, url, content, date
                 var article = data["article"];
                 feed_id = article["feed"];
@@ -73,6 +72,11 @@ $(document).ready(function() {
                     var all = $("#unread_All");
                     count = parseInt(all.text().substring(1, all.text().length-1));
                     all.text("(" + (count-1) + ")");
+                    if(count > 1) {
+                      $(document).attr('title', 'Feeeeeder (' + (count-1) + ')');
+                    } else {
+                      $(document).attr('title', 'Feeeeeder');
+                    }
                 }
             }.bind(this))
         }
@@ -86,22 +90,28 @@ $(document).ready(function() {
         var viewing_index = 0;
         var loaded_articles = [];
 
-        this.starred = function() {
-            $.getJSON("starred", function(data) {
-                console.log("starred:" , data);
-            });
+        function update_unread(unread) {
+            var unread_total = 0;
+            for(feed in unread) {
+                unread_total += unread[feed];
+                $('#unread_' + feed).text("(" + unread[feed] + ")");
+            }
+            $('#unread_All').text("(" + unread_total + ")");
+            if(unread_total > 0) {
+              $(document).attr('title', 'Feeeeeder (' + unread_total + ')');
+            } else {
+              $(document).attr('title', 'Feeeeeder');
+            }
         }
 
-        function process_feeds(feeds, unread) {
+        function process_feeds(feeds) {
             var $all_feeds = $("<div>");
             $all_feeds.addClass('feed_link');
             $all_feeds.append("All ");
             var unread_span = $("<span>");
             unread_span.attr('id', "unread_All");
-            var unread_total = 0;
-            for(feed in unread)
-                unread_total += unread[feed];
-            unread_span.text("(" + unread_total + ")");
+            unread_span.text("(0)");
+
             $all_feeds.append(unread_span);
             $all_feeds.click(function() {
               get_unread('all');
@@ -116,11 +126,8 @@ $(document).ready(function() {
                 feed_link.append(feed["title"] + " ");
                 var unread_span = $("<span>");
                 unread_span.attr('id', "unread_" + feed["id"]);
-                if(feed["title"] in unread) {
-                  unread_span.text("(" + unread[feed["title"]] + ")");
-                } else {
-                  unread_span.text("(0)");
-                }
+                unread_span.text('(0)');
+
                 feed_link.append(unread_span);
                 feed_link.click(function(feed) {
                     get_unread(feed["id"]);
@@ -139,46 +146,35 @@ $(document).ready(function() {
 
         function get_unread(feed) {
             $.getJSON("list?feed=" + feed, function(data) {  // get user's unread reading list
-                $("html, body").scrollTop(0);
-                var articles = data['articles'];
-                var content = $('#content');
-                content.empty();
-
-                // reset viewing queue
-                loaded_articles = [];
-                viewing_index = 0;
-
-                for(var a = 0; a < articles.length; a++) {
-                    var article = new Article(articles[a]);
-                    loaded_articles.push(article);
-                    var article_box = $("<div>");
-                    article_box.addClass("article_box");
-                    content.append(article_box);
-                    article.load(article_box);
-                }
+                display_articles(data);
             });
         }
 
         function get_starred() {
             $.getJSON("starred", function(data) {
-                $("html, body").scrollTop(0);
-                var articles = data['articles'];
-                var content = $('#content');
-                content.empty();
-
-                // reset viewing queue
-                loaded_articles = [];
-                viewing_index = 0;
-
-                for(var a = 0; a < articles.length; a++) {
-                    var article = new Article(articles[a], true); // starred = true
-                    loaded_articles.push(article);
-                    var article_box = $("<div>");
-                    article_box.addClass("article_box");
-                    content.append(article_box);
-                    article.load(article_box);
-                }
+                display_articles(data, true);
             });
+        }
+
+        function display_articles(data, starred) {
+            if(starred == null) starred = false;
+            $("html, body").scrollTop(0);
+            var articles = data['articles'];
+            var content = $('#content');
+            content.empty();
+
+            // reset viewing queue
+            loaded_articles = [];
+            viewing_index = 0;
+
+            for(var a = 0; a < articles.length; a++) {
+                var article = new Article(articles[a], starred);
+                loaded_articles.push(article);
+                var article_box = $("<div>");
+                article_box.addClass("article_box");
+                content.append(article_box);
+                article.load(article_box);
+            }
         }
 
         // auto-read articles as the pass out of the screen
@@ -194,15 +190,20 @@ $(document).ready(function() {
             viewing_index = i;
         }.bind(this));
 
+        function get_unread_counts() {
+            $.getJSON("unread", function(data) {
+                unread = data["counts"];
+                update_unread(unread);
+            });
+        }
+
         // init
         $.getJSON("feeds", function(data) { // get user's feed
             var feeds = data["feeds"];
-            console.log("feeds:", feeds);
-            $.getJSON("unread", function(data) {
-                console.log("unread:", data);
-                unread = data["counts"];
-                process_feeds(feeds, unread);
-            });
+            process_feeds(feeds);
+            get_unread_counts();
         });
+
+        setInterval(get_unread_counts, 300000); // refresh unread counts every 5 minutes
     }
 }.bind(window));
