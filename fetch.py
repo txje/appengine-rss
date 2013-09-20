@@ -9,12 +9,10 @@ from xml.etree import ElementTree # XML parsing
 class updater(webapp2.RequestHandler):
     def get(self):
         active_feeds = {}
-        for r in models.Reading.all():
-            if not active_feeds.has_key(r.feed):
-                active_feeds[r.feed] = []
-            active_feeds[r.feed].append(r.user)
-        for fid in active_feeds.keys():
-            feed = models.Feed.get_by_id(fid)
+        for feed in models.Feed.all():
+            readings = [r for r in models.Reading.all().filter('feed', feed.key().id())] # n read ops
+            if len(readings) == 0:
+              continue # no one is reading this feed
             try:
               result = urlfetch.fetch(feed.url)
             except Exception:
@@ -32,14 +30,20 @@ class updater(webapp2.RequestHandler):
                 print "Error: unknown feed format (must be RSS or Atom)"
                 return
 
+            unread_count = 0
             for article in new_articles:
-                match = models.Article.get_by_properties({"title":article["title"], "url":article["url"]})
+                match = models.Article.get_by_properties({"title":article["title"], "url":article["url"]}) # 1 read op
                 if not match:
+                    unread_count += 1
                     a = models.Article(title = article["title"], url = article["url"], content = article["content"], date = article["date"], feed = feed.key().id())
-                    a.put()
-                    for user in active_feeds[fid]:
-                        u = models.Unread(user = user, article = a.key().id())
-                        u.put()
+                    a.put() # 1 write op
+                    for r in readings:
+                        u = models.Unread(user = r.user, article = a.key().id(), feed = r.feed, date = article["date"])
+                        u.put() # 1 write op
+
+            for r in readings:
+                r.unread += unread_count
+                r.put() # 1 write op
 
     def post(self):
         self.get()

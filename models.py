@@ -42,10 +42,14 @@ class User(AugmentedModel):
 class Reading(AugmentedModel):
     user = db.IntegerProperty()
     feed = db.IntegerProperty()
+    unread = db.IntegerProperty()
 
 class Unread(AugmentedModel):
     user = db.IntegerProperty()
     article = db.IntegerProperty()
+    # these are redundant because we could derive this from the article, but it will save a lot of reads/time
+    feed = db.IntegerProperty()
+    date = db.DateTimeProperty()
 
 class Star(AugmentedModel):
     user = db.IntegerProperty()
