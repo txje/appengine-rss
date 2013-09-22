@@ -148,9 +148,13 @@ class remove(DefaultHandler):
     def get(self):
         if not self.auth():
           return
-        r = models.Reading.get_by_properties({"user": self.user, "feed": int(self.request.get("feed"))})
+        f = int(self.request.get("feed"))
+        r = models.Reading.get_by_properties({"user": self.user, "feed": f})
         if r != None:
-            #r.delete()
+            r.delete()
+            # remove unread articles for the removed feed
+            for u in models.Unread.all().filter("feed", f).filter("user", self.user): # n read ops
+              u.delete() # n*2 (?) write ops
             self.response.out.write("Success")
         else:
             self.response.out.write("Error: No such feed")
