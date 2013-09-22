@@ -57,7 +57,7 @@ class reading_list(DefaultHandler):
         unread.filter('user', self.user)
         if feed != 'all':
           unread.filter('feed', int(feed))
-        #unread.order('date')
+        unread.order('date')
         articles = [u.article for u in unread.fetch(FETCH_LIMIT)] # <= 10 read ops
 
         # get offset based on last article already sent

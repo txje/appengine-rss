@@ -211,10 +211,7 @@ $(document).ready(function() {
             if(loading) return;
             loading = true;
             if(selected_feed == 'Starred') {
-                $.getJSON("starred?last=" + last_loaded, function(data) {
-                    display_articles(data, false, true);
-                    loading = false;
-                });
+              // not paging starred as of now
             } else {
                 $.getJSON("list?feed=" + selected_feed + "&last=" + last_loaded, function(data) {  // get user's unread reading list
                     display_articles(data, false);
