@@ -94,6 +94,7 @@ $(document).ready(function() {
         var viewing_index = 0;
         var loaded_articles = [];
         var selected_feed = 'All';
+        var loading = false;
 
         function update_unread(feeds) {
             var unread_total = 0;
@@ -207,13 +208,17 @@ $(document).ready(function() {
         }.bind(this));
 
         function load_more_articles(last_loaded) {
+            if(loading) return;
+            loading = true;
             if(selected_feed == 'Starred') {
                 $.getJSON("starred?last=" + last_loaded, function(data) {
                     display_articles(data, false, true);
+                    loading = false;
                 });
             } else {
                 $.getJSON("list?feed=" + selected_feed + "&last=" + last_loaded, function(data) {  // get user's unread reading list
                     display_articles(data, false);
+                    loading = false;
                 });
             }
         }

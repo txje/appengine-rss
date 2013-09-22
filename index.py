@@ -53,6 +53,7 @@ class reading_list(DefaultHandler):
         unread = models.Unread.all()
         feed = self.request.get('feed')
         last = self.request.get('last')
+        last = int(last) if last != None and last != "" else None
         unread.filter('user', self.user)
         if feed != 'all':
           unread.filter('feed', int(feed))
@@ -60,9 +61,9 @@ class reading_list(DefaultHandler):
         articles = [u.article for u in unread.fetch(FETCH_LIMIT)] # <= 10 read ops
 
         # get offset based on last article already sent
-        if last != None and last in articles:
+        if last in articles:
             pos = articles.index(last)
-            articles = articles[pos+1:] + [u.article for u in unread.fetch(FETCH_LIMIT - pos - 1, offset = pos+1)] # <= 10 read ops
+            articles = articles[pos+1:] + [u.article for u in unread.fetch(pos+1, offset = FETCH_LIMIT)] # <= 10 read ops
 
         self.response.out.write(json.dumps({"articles":articles}))
 
@@ -95,13 +96,13 @@ class read(DefaultHandler):
         ur = models.Unread.get_by_properties({"user": self.user, "article": a}) # 1 read op
         if ur != None:
           ur.delete() # 1 write op
-        self.response.out.write("Success")
 
-        # decrement the unread count
-        article = models.Article.get_by_id(a) # 1 read op
-        reading = models.Reading.get_by_properties({"feed": article.feed, "user": self.user}) # 1 read op
-        reading.unread -= 1
-        reading.put() # 1 write op
+          # decrement the unread count
+          article = models.Article.get_by_id(a) # 1 read op
+          reading = models.Reading.get_by_properties({"feed": article.feed, "user": self.user}) # 1 read op
+          reading.unread -= 1
+          reading.put() # 1 write op
+        self.response.out.write("Success")
 
 # if the feed already exists and/or the user is already reading it, this
 # returns the feed object as though nothing unusual happened
