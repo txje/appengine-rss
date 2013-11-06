@@ -9,6 +9,7 @@ import json
 import logging
 from google.appengine.api import urlfetch
 from xml.etree import ElementTree # XML parsing
+from google.appengine.ext import db
 
 class DefaultHandler(webapp2.RequestHandler):
     def auth(self):
@@ -89,20 +90,32 @@ class article(DefaultHandler):
         self.response.out.write(json.dumps({"article":a.json()}))
 
 class read(DefaultHandler):
-    def get(self):
-        if not self.auth():
-          return
-        a = int(self.request.get('article'))
-        ur = models.Unread.get_by_properties({"user": self.user, "article": a}) # 1 read op
-        if ur != None:
-          ur.delete() # 1 write op
+  def get(self):
+    if not self.auth():
+      return
+    a = int(self.request.get('article'))
+    ur = models.Unread.get_by_properties({"user": self.user, "article": a}) # 1 read op
+    if ur != None:
+      ur.delete() # 1 write op
 
-          # decrement the unread count
-          article = models.Article.get_by_id(a) # 1 read op
-          reading = models.Reading.get_by_properties({"feed": article.feed, "user": self.user}) # 1 read op
-          reading.unread -= 1
-          reading.put() # 1 write op
-        self.response.out.write("Success")
+      article = models.Article.get_by_id(a) # 1 read op
+      reading = models.Reading.get_by_properties({"feed": article.feed, "user": self.user}) # 1 read op
+      # decrement the unread count, try up to 10 times (concurrency issues)
+      for i in xrange(10):
+        try:
+          decrement_unread(reading.key())
+        except Exception as e:
+          pass # there are rare cases where an exception may be raised by the transaction completed, let's ignore those
+        else:
+          break
+    self.response.out.write("Success")
+
+# this will be atomic to avoid concurrency issues
+@db.transactional
+def decrement_unread(r_key):
+  reading = models.Reading.get(r_key)
+  reading.unread -= 1
+  reading.put() # 1 write op
 
 # if the feed already exists and/or the user is already reading it, this
 # returns the feed object as though nothing unusual happened
@@ -140,7 +153,7 @@ class add(DefaultHandler):
               feed = matching_feed
         already_reading = models.Reading.get_by_properties({"user": self.user, "feed": feed.key().id()})
         if not already_reading:
-          r = models.Reading(user = self.user, feed = feed.key().id())
+          r = models.Reading(user = self.user, feed = feed.key().id(), unread = 0)
           r.put()
         self.response.out.write(json.dumps(feed.json()))
 

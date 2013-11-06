@@ -5,6 +5,7 @@ import models
 from datetime import datetime, timedelta
 from google.appengine.api import urlfetch
 from xml.etree import ElementTree # XML parsing
+from google.appengine.ext import db
 
 class updater(webapp2.RequestHandler):
     def get(self):
@@ -19,7 +20,7 @@ class updater(webapp2.RequestHandler):
               print "Failed to fetch URL %s" % feed.url
               continue
             if result.status_code != 200:
-                raise Exception("Failed to fetch feed URL: " + feed.url)
+              raise Exception("Failed to fetch feed URL: " + feed.url + ", result = " + str(result.status_code))
             root = ElementTree.fromstring(result.content)
             atom_ns = '{http://www.w3.org/2005/Atom}'
             if root.tag == "rss":
@@ -32,18 +33,29 @@ class updater(webapp2.RequestHandler):
 
             unread_count = 0
             for article in new_articles:
-                match = models.Article.get_by_properties({"title":article["title"], "url":article["url"]}) # 1 read op
-                if not match:
-                    unread_count += 1
-                    a = models.Article(title = article["title"], url = article["url"], content = article["content"], date = article["date"], feed = feed.key().id())
-                    a.put() # 1 write op
-                    for r in readings:
-                        u = models.Unread(user = r.user, article = a.key().id(), feed = r.feed, date = article["date"])
-                        u.put() # 1 write op
+                match = models.Article.get_by_properties({"url":article["url"]}) # 1 read op
+                if match: # update contents
+                  match.title = article["title"]
+                  match.content = article["content"]
+                  match.put()
+                else:
+                  unread_count += 1
+                  a = models.Article(title = article["title"], url = article["url"], content = article["content"], date = article["date"], feed = feed.key().id())
+                  a.put() # 1 write op
+                  for r in readings:
+                      u = models.Unread(user = r.user, article = a.key().id(), feed = r.feed, date = article["date"])
+                      u.put() # 1 write op
 
+            # fetch them again here so that the turnaround is as fast as possible, avoid concurrency issues
             for r in readings:
-                r.unread += unread_count
-                r.put() # 1 write op
+              # increase the unread count, try up to 10 times (concurrency issues)
+              for i in xrange(10):
+                try:
+                  increase_unread(r.key().id(), unread_count)
+                except Exception as e:
+                  pass # there are rare cases where an exception may be raised by the transaction completed, let's ignore those
+                else:
+                  break
 
     def post(self):
         self.get()
@@ -102,6 +114,12 @@ class updater(webapp2.RequestHandler):
             date = datetime.now()
           new_articles.append({"title":title, "url":url, "content":content, "date":date})
       return new_articles
+
+@db.transactional
+def increase_unread(reading_id, amount):
+  r = models.Reading.get_by_id(reading_id)
+  r.unread += amount
+  r.put() # 1 write op
 
 app = webapp2.WSGIApplication([
     ("/tasks/fetch", updater)
