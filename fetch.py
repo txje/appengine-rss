@@ -16,8 +16,8 @@ class updater(webapp2.RequestHandler):
               continue # no one is reading this feed
             try:
               result = urlfetch.fetch(feed.url)
-            except Exception:
-              print "Failed to fetch URL %s" % feed.url
+            except Exception as e:
+              print "Failed to fetch URL %s\n" % feed.url, e
               continue
             if result.status_code != 200:
               raise Exception("Failed to fetch feed URL: " + feed.url + ", result = " + str(result.status_code))
