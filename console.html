@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<head>
+<title>Console Feeeeeder</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="js/reader.js"></script>
+<script>
+    $(document).ready(function() {
+        var reader = new ConsoleReader($("#console"));
+        reader.print("/----------------------/");
+        reader.print("/ Feeeeeder            /");
+        reader.print("/----------------------/");
+        reader.print("");
+    });
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href='css/console.css' rel='stylesheet' type='text/css'>
+</head>
+<body>
+  <div id="console">
+  </div>
+  <div class="entry">
+    > <div class="cursor" contenteditable></div>
+  </div>
+</body>
+</html>

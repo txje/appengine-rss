@@ -222,6 +222,13 @@ class manage_feeds(DefaultHandler):
         args = {"user": self.user_name, "logout_url": self.logout_url}
         self.response.out.write(template.render("feeds.html", args))
 
+class console(DefaultHandler):
+    def get(self):
+        if not self.auth():
+          return
+        args = {"user": self.user_name, "logout_url": self.logout_url}
+        self.response.out.write(template.render("console.html", args))
+
 app = webapp2.WSGIApplication([
     ("/", home),
     ("/feeds", feeds),
@@ -236,4 +243,5 @@ app = webapp2.WSGIApplication([
     ("/starred", starred),
     ("/new_user", new_user),
     ("/manage_feeds", manage_feeds),
+    ("/console", console)
 ], debug = True)

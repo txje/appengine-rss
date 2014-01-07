@@ -1,0 +1,31 @@
+/* Small devices (tablets, 768px and up) */
+@media (min-width: @screen-sm) {
+}
+
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: @screen-md) {
+}
+
+/* Large devices (large desktops, 1200px and up) */
+@media (min-width: @screen-lg) {
+}
+
+body {
+  background-color: #000000;
+  font-family: monospace;
+}
+
+div.entry {
+  color: #EEEEEE;
+}
+
+div.article_title {
+  font-weight: bold;
+}
+
+div.article_content {
+}
+
+div.cursor {
+  color: #00FF00;
+}
