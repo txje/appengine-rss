@@ -2,12 +2,13 @@
 <head>
 <title>Console Feeeeeder</title>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-<script src="js/reader.js"></script>
+<script src="js/console_reader.js"></script>
 <script>
     $(document).ready(function() {
         var reader = new ConsoleReader($("#console"));
+        reader.register($(".cursor"));
         reader.print("/----------------------/");
-        reader.print("/ Feeeeeder            /");
+        reader.print("/ Feeeeeder ---------- /");
         reader.print("/----------------------/");
         reader.print("");
     });
@@ -19,7 +20,7 @@
   <div id="console">
   </div>
   <div class="entry">
-    > <div class="cursor" contenteditable></div>
+    > <div class="cursor"></div>
   </div>
 </body>
 </html>

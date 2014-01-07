@@ -19,13 +19,18 @@ div.entry {
   color: #EEEEEE;
 }
 
-div.article_title {
+a.article_title {
+  color: #EEEEEE;
+  text-decoration: none;
   font-weight: bold;
 }
 
 div.article_content {
+  color: #EEEEEE;
 }
 
 div.cursor {
   color: #00FF00;
+  display: inline;
+  width: 800px;
 }
