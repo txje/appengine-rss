@@ -2,8 +2,8 @@
 //
 // get unread count
 // star article
-// open article
-// next article (automatically marks as read)
+// next article (automatically marks as read) [Enter]
+// buffer specific feed
 
 $(document).ready(function() {
     this.Article = function(id, starred) {
@@ -130,6 +130,7 @@ $(document).ready(function() {
                 if(viewing_index >= loaded_articles.length) {
                     this.print("No more articles.");
                     this.print("");
+                    $("html, body").scrollTop($(document).height());
                     return;
                 }
                 loaded_articles[viewing_index].load($container);
