@@ -34,3 +34,7 @@ div.cursor {
   display: inline;
   width: 800px;
 }
+
+div#prompt {
+  display: inline;
+}

@@ -61,15 +61,6 @@ $(document).ready(function() {
             $container.append(entry);
         }
 
-        function get_unread_counts() {
-            $.getJSON("feeds", function(data) {
-                var feeds = data["feeds"];
-                for(var f = 0; f < feeds.length; f++) {
-                    unread += feeds[f].unread;
-                }
-            });
-        }
-
         // feed: feed ID or 'all'
         function get_unread(feed) {
             selected_feed = feed;
@@ -114,16 +105,26 @@ $(document).ready(function() {
                 });
             }
         }
+        
+        function load_feeds() {
+            $.getJSON("feeds", function(data) { // get user's feed
+                var feeds = data["feeds"];
+                for(var f = 0; f < feeds.length; f++) {
+                    this.print("[" + feeds[f]["unread"] + "] " + feeds[f]["title"]);
+                    unread += feeds[f].unread;
+                }
+                this.print("");
+                prompt("all [" + unread + "]>");
+                get_unread('all');
+            }.bind(this));
+        }
 
         // init
-        $.getJSON("feeds", function(data) { // get user's feed
-            var feeds = data["feeds"];
-            for(var f = 0; f < feeds.length; f++) {
-                this.print("[" + feeds[f]["unread"] + "] " + feeds[f]["title"])
-            }
-            this.print("");
-            get_unread('all');
-        }.bind(this));
+        load_feeds.call(this);
+        
+        function prompt(str) {
+            $('#prompt').text(str);
+        }
         
         function process(command) {
             if(command == "") {
@@ -136,11 +137,15 @@ $(document).ready(function() {
                 loaded_articles[viewing_index].load($container);
                 loaded_articles[viewing_index].read();
                 viewing_index += 1;
+                unread -= 1;
+                prompt("all [" + unread + "]>");
                 if(viewing_index >= loaded_articles.length - 2) {
                     load_more_articles(loaded_articles[loaded_articles.length - 1].id)
                 }
             } else if(command == "clear") {
                 clear();
+            } else if(command == "unread") {
+                load_feeds.call(this);
             }
         };
 
