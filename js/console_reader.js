@@ -89,7 +89,16 @@ $(document).ready(function() {
             
             for(var a = 0; a < articles.length; a++) {
                 var article = new Article(articles[a], starred);
-                loaded_articles.push(article);
+                var duplicate = false;
+                for(var l = 0; l < loaded_articles.length; l++) {
+                  if(loaded_articles[l].id == article.id) {
+                    duplicate = true;
+                    break;
+                  }
+                }
+                if(!duplicate) {
+                  loaded_articles.push(article);
+                }
             }
         }
 
@@ -108,6 +117,7 @@ $(document).ready(function() {
         
         function load_feeds() {
             $.getJSON("feeds", function(data) { // get user's feed
+                unread = 0;
                 var feeds = data["feeds"];
                 for(var f = 0; f < feeds.length; f++) {
                     this.print("[" + feeds[f]["unread"] + "] " + feeds[f]["title"]);
@@ -145,6 +155,7 @@ $(document).ready(function() {
             } else if(command == "clear") {
                 clear();
             } else if(command == "unread") {
+                clear();
                 load_feeds.call(this);
             }
         };
