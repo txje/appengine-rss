@@ -44,7 +44,15 @@ class feeds(DefaultHandler):
           return
         r = models.Reading.all()
         r.filter('user = ', self.user)
+
+        # there are two ways to do this
+
+        # 1. use an integer unread counter - this has had major concurrency issues
+        #    - perhaps sharding the counter would help
         #self.response.out.write(json.dumps({"feeds":[dict(models.Feed.get_by_id(a.feed).json().items() + {"unread":a.unread}.items()) for a in r]}))
+
+        # 2. just count the unread articles
+        #    - this is slower and uses [count] small datastore operations
         self.response.out.write(json.dumps({"feeds":[dict(models.Feed.get_by_id(a.feed).json().items() + {"unread":models.Unread.all().filter('user = ', self.user).filter('feed = ', a.feed).count()}.items()) for a in r]}))
 
 class reading_list(DefaultHandler):
