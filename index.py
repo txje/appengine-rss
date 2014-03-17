@@ -44,7 +44,8 @@ class feeds(DefaultHandler):
           return
         r = models.Reading.all()
         r.filter('user = ', self.user)
-        self.response.out.write(json.dumps({"feeds":[dict(models.Feed.get_by_id(a.feed).json().items() + {"unread":a.unread}.items()) for a in r]}))
+        #self.response.out.write(json.dumps({"feeds":[dict(models.Feed.get_by_id(a.feed).json().items() + {"unread":a.unread}.items()) for a in r]}))
+        self.response.out.write(json.dumps({"feeds":[dict(models.Feed.get_by_id(a.feed).json().items() + {"unread":models.Unread.all().filter('user = ', self.user).filter('feed = ', a.feed).count()}.items()) for a in r]}))
 
 class reading_list(DefaultHandler):
     def get(self):
@@ -110,7 +111,7 @@ class read(DefaultHandler):
           break
     self.response.out.write("Success")
 
-# this will be atomic to avoid concurrency issues
+# this will be "atomic" but may not avoid concurrency issues
 @db.transactional
 def decrement_unread(r_key):
   reading = models.Reading.get(r_key)
