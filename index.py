@@ -139,7 +139,10 @@ class add(DefaultHandler):
             if result.status_code != 200:
                 raise Exception("Failed to fetch feed URL: " + feed.url)
             # some elements may have a namespace prefix like {http://www.w3.org/2005/Atom}
-            root = ElementTree.fromstring(result.content)
+            try:
+              root = ElementTree.fromstring(result.content)
+            except Exception as err:
+              raise Exception("Error: unable to parse feed '%s' (%s)" % (feed.url, str(err)))
             if root.tag == "rss":
               channel = root.find("channel")
               feed = models.Feed(url = feed_url,

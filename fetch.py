@@ -21,15 +21,19 @@ class updater(webapp2.RequestHandler):
               continue
             if result.status_code != 200:
               raise Exception("Failed to fetch feed URL: " + feed.url + ", result = " + str(result.status_code))
-            root = ElementTree.fromstring(result.content)
+            try:
+              root = ElementTree.fromstring(result.content)
+            except Exception as err:
+              print "Error: unable to parse feed '%s' (%s)" % (feed.url, str(err))
+              continue
             atom_ns = '{http://www.w3.org/2005/Atom}'
             if root.tag == "rss":
                 new_articles = self.parse_rss(root)
             elif root.tag == atom_ns+"feed":
                 new_articles = self.parse_atom(root, atom_ns)
             else:
-                print "Error: unknown feed format (must be RSS or Atom)"
-                return
+                print "Error: unknown feed '%s' format (must be RSS or Atom)" % feed.url
+                continue
 
             unread_count = 0
             for article in new_articles:
