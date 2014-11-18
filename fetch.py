@@ -20,7 +20,7 @@ class updater(webapp2.RequestHandler):
               print "Failed to fetch URL %s\n" % feed.url, e
               continue
             if result.status_code != 200:
-              "Failed to fetch feed URL: " + feed.url + ", result = " + str(result.status_code))
+              print "Failed to fetch feed URL: " + feed.url + ", result = " + str(result.status_code)
               continue
             try:
               root = ElementTree.fromstring(result.content)
