@@ -68,9 +68,9 @@ class updater(webapp2.RequestHandler):
     def parse_rss(self, root):
       new_articles = []
       for article in root.find("channel").findall("item"):
-          title = article.find("title").text
-          url = article.find("link").text
-          content = article.find("description").text
+          title = (article.find("title").text if article.find("title") is not None else "No title!?")
+          url = (article.find("link").text if article.find("link") is not None else None)
+          content = (article.find("description").text if article.find("description") is not None else "No description!?")
 
           # parse pubDate
           # date is given as "Mon, 12 Aug 2013 01:00:00 GMT" or "-0000" instead of "GMT"

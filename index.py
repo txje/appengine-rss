@@ -146,10 +146,10 @@ class add(DefaultHandler):
             if root.tag == "rss":
               channel = root.find("channel")
               feed = models.Feed(url = feed_url,
-                  title = channel.find("title").text,
-                  description = channel.find("description").text,
-                  language = (channel.find("language").text if channel.find("language") is not None else None), # not required
-                  link = channel.find("link").text)
+                  title = (channel.find("title").text if channel.find("title") is not None else "No title!?"),
+                  description = (channel.find("description").text if channel.find("description") is not None else "No description!?"),
+                  language = (channel.find("language").text if channel.find("language") is not None else "No language!?"), # not required
+                  link = (channel.find("link").text if channel.find("link") is not None else None))
             else:
               namespace = '{http://www.w3.org/2005/Atom}'
               if root.tag == namespace+"feed":
