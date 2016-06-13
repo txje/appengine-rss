@@ -143,6 +143,8 @@ class add(DefaultHandler):
               root = ElementTree.fromstring(result.content)
             except Exception as err:
               raise Exception("Error: unable to parse feed '%s' (%s)" % (feed.url, str(err)))
+
+            # RSS
             if root.tag == "rss":
               channel = root.find("channel")
               feed = models.Feed(url = feed_url,
@@ -150,13 +152,22 @@ class add(DefaultHandler):
                   description = (channel.find("description").text if channel.find("description") is not None else "No description!?"),
                   language = (channel.find("language").text if channel.find("language") is not None else "No language!?"), # not required
                   link = (channel.find("link").text if channel.find("link") is not None else None))
-            else:
+
+            # Atom
+            elif root.tag == "{http://www.w3.org/2005/Atom}feed":
               namespace = '{http://www.w3.org/2005/Atom}'
-              if root.tag == namespace+"feed":
-                atom = root
-                feed = models.Feed(url = feed_url,
-                    title = atom.find(namespace+"title").text,
-                    link = atom.find(namespace+"link").get("href"))
+              atom = root
+              feed = models.Feed(url = feed_url,
+                  title = atom.find(namespace+"title").text,
+                  link = atom.find(namespace+"link").get("href"))
+
+            # Atom 1.0 as RDF (ex. biorxiv)
+            elif root.tag == "rdf:RDF":
+              rdf = root
+              feed = models.Feed(url = feed_url,
+                  title = rdf.find("channel").find("title").text,
+                  link = rdf.find("channel").find("link").text
+
             # check again to make sure we don't already have this feed
             matching_feed = models.Feed.get_by_properties({"link": feed.link})
             if matching_feed == None:

@@ -32,6 +32,8 @@ class updater(webapp2.RequestHandler):
                 new_articles = self.parse_rss(root)
             elif root.tag == atom_ns+"feed":
                 new_articles = self.parse_atom(root, atom_ns)
+            elif root.tag == "rdf:RDF": # Atom 1.0 as RDF
+                new_articles = self.parse_rdf(root)
             else:
                 print "Error: unknown feed '%s' format (must be RSS or Atom)" % feed.url
                 continue
@@ -105,6 +107,31 @@ class updater(webapp2.RequestHandler):
           # parse pubDate (<updated>)
           # date is given as "2013-08-12T01:00:00Z" or "-01:00" instead of "Z" and may optionally have two decimals of extra precision in the seconds place
           pubDate = article.find(namespace+"updated")
+          if pubDate != None:
+            pubDate = pubDate.text
+            try:
+              # so I'm not trying very hard here, just ignoring the timezone
+              date = datetime.strptime(pubDate[:19], "%Y-%m-%dT%H:%M:%S")
+            except Exception as e:
+              try:
+                date = datetime.strptime(pubDate[:10], "%Y-%m-%d")
+              except Exception as e:
+                date = datetime.now()
+          else:
+            date = datetime.now()
+          new_articles.append({"title":title, "url":url, "content":content, "date":date})
+      return new_articles
+
+    def parse_rdf(self, root):
+      new_articles = []
+      for article in root.findall("item"):
+          title = article.find("title").text
+          url = article.find("link").text
+          content = article.find("description").text
+
+          # parse pubDate (<updated>)
+          # date is given as "2013-08-12T01:00:00Z" or "-01:00" instead of "Z" and may optionally have two decimals of extra precision in the seconds place
+          pubDate = article.find("dc:date")
           if pubDate != None:
             pubDate = pubDate.text
             try:
