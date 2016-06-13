@@ -7,6 +7,17 @@ from google.appengine.api import urlfetch
 from xml.etree import ElementTree # XML parsing
 from google.appengine.ext import db
 
+nsmap = {
+    "xmlns": "http://purl.org/rss/1.0/",
+    "xmlns:admin": "http://webns.net/mvcb/",
+    "xmlns:rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "xmlns:prism": "http://purl.org/rss/1.0/modules/prism/",
+    "xmlns:taxo": "http://purl.org/rss/1.0/modules/taxonomy/",
+    "xmlns:content": "http://purl.org/rss/1.0/modules/content/",
+    "xmlns:dc": "http://purl.org/dc/elements/1.1/",
+    "xmlns:syn": "http://purl.org/rss/1.0/modules/syndication/"
+    }
+
 class updater(webapp2.RequestHandler):
     def get(self):
         active_feeds = {}
@@ -32,7 +43,7 @@ class updater(webapp2.RequestHandler):
                 new_articles = self.parse_rss(root)
             elif root.tag == atom_ns+"feed":
                 new_articles = self.parse_atom(root, atom_ns)
-            elif root.tag == "rdf:RDF": # Atom 1.0 as RDF
+            elif root.tag == "{%s}RDF" % nsmap["xmlns:rdf"]: # Atom 1.0 as RDF
                 new_articles = self.parse_rdf(root)
             else:
                 print "Error: unknown feed '%s' format (must be RSS or Atom)" % feed.url
@@ -47,7 +58,8 @@ class updater(webapp2.RequestHandler):
                   match.put()
                 else:
                   unread_count += 1
-                  a = models.Article(title = article["title"], url = article["url"], content = article["content"], date = article["date"], feed = feed.key().id())
+                  #print "Title: --%s--, URL: --%s--, Content: --%s--" % (article["title"], article["url"], article["content"].encode("utf8", "ignore"))
+                  a = models.Article(title = article["title"].strip(), url = article["url"], content = article["content"], date = article["date"], feed = feed.key().id())
                   a.put() # 1 write op
                   for r in readings:
                       u = models.Unread(user = r.user, article = a.key().id(), feed = r.feed, date = article["date"])
@@ -70,9 +82,9 @@ class updater(webapp2.RequestHandler):
     def parse_rss(self, root):
       new_articles = []
       for article in root.find("channel").findall("item"):
-          title = (article.find("title").text if article.find("title") is not None else "No title!?")
-          url = (article.find("link").text if article.find("link") is not None else None)
-          content = (article.find("description").text if article.find("description") is not None else "No description!?")
+          title = (article.find("title").text.strip().replace('\n', ' -- ') if article.find("title") is not None else "No title!?")
+          url = (article.find("link").text.strip() if article.find("link") is not None else None)
+          content = (article.find("description").text.strip() if article.find("description") is not None else "No description!?")
 
           # parse pubDate
           # date is given as "Mon, 12 Aug 2013 01:00:00 GMT" or "-0000" instead of "GMT"
@@ -100,9 +112,9 @@ class updater(webapp2.RequestHandler):
     def parse_atom(self, root, namespace):
       new_articles = []
       for article in root.findall(namespace+"entry"):
-          title = article.find(namespace+"title").text
-          url = article.find(namespace+"link").get("href")
-          content = article.find(namespace+"content").text if article.find(namespace+"content") is not None else article.find(namespace+"summary").text
+          title = article.find(namespace+"title").text.strip().replace('\n', ' -- ')
+          url = article.find(namespace+"link").get("href").strip()
+          content = article.find(namespace+"content").text.strip() if article.find(namespace+"content") is not None else article.find(namespace+"summary").text.strip()
 
           # parse pubDate (<updated>)
           # date is given as "2013-08-12T01:00:00Z" or "-01:00" instead of "Z" and may optionally have two decimals of extra precision in the seconds place
@@ -124,16 +136,20 @@ class updater(webapp2.RequestHandler):
 
     def parse_rdf(self, root):
       new_articles = []
-      for article in root.findall("item"):
-          title = article.find("title").text
-          url = article.find("link").text
-          content = article.find("description").text
+      for article in root.findall("xmlns:item", nsmap):
+          title = article.find("xmlns:title", nsmap).text.strip().replace('\n', ' -- ')
+          #print "Title: --%s--" % title
+          url = article.find("xmlns:link", nsmap).text.strip().strip('"')
+          #print "URL: --%s--" % url
+          content = article.find("xmlns:description", nsmap).text.strip()
+          #print "Content: --%s--" % content
 
           # parse pubDate (<updated>)
           # date is given as "2013-08-12T01:00:00Z" or "-01:00" instead of "Z" and may optionally have two decimals of extra precision in the seconds place
-          pubDate = article.find("dc:date")
+          pubDate = article.find("xmlns:dc:date", nsmap)
           if pubDate != None:
             pubDate = pubDate.text
+            #print "Date: --%s--" % pubDate
             try:
               # so I'm not trying very hard here, just ignoring the timezone
               date = datetime.strptime(pubDate[:19], "%Y-%m-%dT%H:%M:%S")

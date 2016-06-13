@@ -11,6 +11,17 @@ from google.appengine.api import urlfetch
 from xml.etree import ElementTree # XML parsing
 from google.appengine.ext import db
 
+nsmap = {
+    "xmlns": "http://purl.org/rss/1.0/",
+    "xmlns:admin": "http://webns.net/mvcb/",
+    "xmlns:rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "xmlns:prism": "http://purl.org/rss/1.0/modules/prism/",
+    "xmlns:taxo": "http://purl.org/rss/1.0/modules/taxonomy/",
+    "xmlns:content": "http://purl.org/rss/1.0/modules/content/",
+    "xmlns:dc": "http://purl.org/dc/elements/1.1/",
+    "xmlns:syn": "http://purl.org/rss/1.0/modules/syndication/"
+    }
+
 class DefaultHandler(webapp2.RequestHandler):
     def auth(self):
         logged_in_user = users.get_current_user()
@@ -162,11 +173,11 @@ class add(DefaultHandler):
                   link = atom.find(namespace+"link").get("href"))
 
             # Atom 1.0 as RDF (ex. biorxiv)
-            elif root.tag == "rdf:RDF":
+            elif root.tag == "{%s}RDF" % nsmap["xmlns:rdf"]:
               rdf = root
               feed = models.Feed(url = feed_url,
-                  title = rdf.find("channel").find("title").text,
-                  link = rdf.find("channel").find("link").text
+                  title = rdf.find("xmlns:channel", nsmap).find("xmlns:title", nsmap).text,
+                  link = rdf.find("xmlns:channel", nsmap).find("xmlns:link", nsmap).text)
 
             # check again to make sure we don't already have this feed
             matching_feed = models.Feed.get_by_properties({"link": feed.link})
