@@ -33,6 +33,8 @@ class DefaultHandler(webapp2.RequestHandler):
                 local_user = models.User(name = logged_in_user.nickname(), google_id = logged_in_user.user_id())
                 local_user.put()
             self.user = local_user.key().id()
+            if self.user == 5899781826150400:
+                self.user = 8002 # hack to make my two accounts point to the same place :)
             self.user_name = local_user.name
             self.logout_url = users.create_logout_url("/")
             return True
@@ -42,9 +44,9 @@ class DefaultHandler(webapp2.RequestHandler):
     def post(self):
         self.get()
 
-class switch_acct(DefaultHander):
-  def get(self):
-    self.response.write(template.render("login.html", {"login_url": users.create_login_url('/')}))
+class switch_acct(webapp2.RequestHandler):
+    def get(self):
+        self.response.write(template.render("login.html", {"login_url": users.create_login_url('/')}))
 
 class home(DefaultHandler):
     def get(self):
