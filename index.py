@@ -42,6 +42,10 @@ class DefaultHandler(webapp2.RequestHandler):
     def post(self):
         self.get()
 
+class switch_acct(DefaultHander):
+  def get(self):
+    self.response.write(template.render("login.html", {"login_url": users.create_login_url('/')}))
+
 class home(DefaultHandler):
     def get(self):
         if not self.auth():
@@ -276,6 +280,7 @@ app = webapp2.WSGIApplication([
     ("/unstar", unstar),
     ("/starred", starred),
     ("/new_user", new_user),
+    ("/switch_acct", switch_acct),
     ("/manage_feeds", manage_feeds),
     ("/console", console)
 ], debug = True)
