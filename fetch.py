@@ -112,8 +112,16 @@ class updater(webapp2.RequestHandler):
     def parse_atom(self, root, namespace):
       new_articles = []
       for article in root.findall(namespace+"entry"):
-          title = article.find(namespace+"title").text.strip().replace('\n', ' -- ')
-          url = article.find(namespace+"link").get("href").strip()
+          title = article.find(namespace+"title").text
+          if title is None:
+              title = ""
+          else:
+              title = title.strip().replace('\n', ' -- ')
+          url = article.find(namespace+"link").get("href")
+          if url is None:
+              url = ""
+          else:
+              url = url.strip()
           content = article.find(namespace+"content").text.strip() if article.find(namespace+"content") is not None else article.find(namespace+"summary").text.strip()
 
           # parse pubDate (<updated>)
